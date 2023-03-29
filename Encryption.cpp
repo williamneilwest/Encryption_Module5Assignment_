@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <string>
 
 /// <summary>
 /// encrypt or decrypt a source string using the provided key
@@ -14,6 +15,8 @@
 /// <param name="source">input string to process</param>
 /// <param name="key">key to use in encryption / decryption</param>
 /// <returns>transformed string</returns>
+
+std::string myfile = "inputdatafile.txt";
 std::string encrypt_decrypt(const std::string& source, const std::string& key)
 {
   // get lengths now instead of calling the function every time.
@@ -29,9 +32,10 @@ std::string encrypt_decrypt(const std::string& source, const std::string& key)
 
   // loop through the source string char by char
   for (size_t i = 0; i < source_length; ++i)
-  { // TODO: student need to change the next line from output[i] = source[i]
+  { // student need to change the next line from output[i] = source[i]
     // transform each character based on an xor of the key modded constrained to key length using a mod
-    output[i] = source[i];
+
+    output[i] = source[i] ^ key_length;
   }
 
   // our output length must equal our source length
@@ -45,7 +49,13 @@ std::string read_file(const std::string& filename)
 {
   std::string file_text = "John Q. Smith\nThis is my test string";
 
-  // TODO: implement loading the file into a string
+  // implement loading the file into a string
+  std::ifstream myFile(filename);
+  if(myFile){
+      std::ostringstream ss;
+      ss<<myFile.rdbuf();
+      file_text = ss.str();
+  }
 
   return file_text;
 }
@@ -67,12 +77,30 @@ std::string get_student_name(const std::string& string_data)
 
 void save_data_file(const std::string& filename, const std::string& student_name, const std::string& key, const std::string& data)
 {
-  //  TODO: implement file saving
+  //  implement file saving
   //  file format
   //  Line 1: student name
   //  Line 2: timestamp (yyyy-mm-dd)
   //  Line 3: key used
   //  Line 4+: data
+
+  time_t t;
+  struct tm* tm;
+  char Date[11];
+  time(&t);
+  tm = localtime(&t);
+    strftime(Date, sizeof Date, "%Y:%m:%d", tm);
+  std::ofstream outdata;
+
+  outdata.open(filename);
+  if(!outdata){
+      std::cout<<"Error opening file..."<<std::endl;
+      exit(1);
+  }
+  outdata << "Student Name: "<<student_name<<std::endl;
+  outdata<<"Date: "<<Date<<std::endl;
+  outdata<<"Key Used: "<<key<<std::endl;
+  outdata<<"Data: "<<data<<std::endl;
 }
 
 int main()
@@ -91,6 +119,7 @@ int main()
   const std::string encrypted_file_name = "encrypteddatafile.txt";
   const std::string decrypted_file_name = "decrytpteddatafile.txt";
   const std::string source_string = read_file(file_name);
+
   const std::string key = "password";
 
   // get the student name from the data file
